@@ -3,13 +3,18 @@ package com.Interfase;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class Main {
+    //через свич нужно делать
 
     public static BufferedReader reader = new BufferedReader(new InputStreamReader(System.in));
     public static String menu;
-    public static ArrayList<Double> numbersArray = new ArrayList<>();
+    public static LinkedList<Double> numbersList = new LinkedList<>();
+    public static LinkedList<Character> singsList = new LinkedList<>();
+
 
     public static void main(String[] args) throws IOException {
 
@@ -48,19 +53,19 @@ public class Main {
         if (Character.isDigit(charArray[0])) {
             for (int i = 1; i < charArray.length; i++) {
                 if (Character.isDigit(charArray[i]) || charArray[i] == '+' || charArray[i] == '-'
-                        || charArray[i] == '*' || charArray[i] == '/' || i == '.') {
+                        || charArray[i] == '*' || charArray[i] == '/' || charArray[i] == '.') {
                     flag = true;
                 } else {
                     System.out.println("Вы ввели неверное выражение");
-                    flag = false;
+//                    flag = false;
                     firstMenu();
                     switchFunction();
                     break;
                 }
             }
-        }else{
+        } else {
             System.out.println("Вы ввели неверное выражение");
-            flag = false;
+//            flag = false;
             firstMenu();
             switchFunction();
         }
@@ -68,25 +73,80 @@ public class Main {
 
         //тут будет рассчет выражения
         if (flag == true) {
-            calculation(charArray);
+            splittingAnExpression(charArray);
         }
     }
 
-    private static void calculation(char[] charArray) {
+    private static void splittingAnExpression(char[] charArray) {
+        numbersList.clear();
+        singsList.clear();
         StringBuilder temp = new StringBuilder();
-        int count = 0;
+
+        //int count = 0;
         for (int i = 0; i < charArray.length; i++) {
             if (Character.isDigit(charArray[i]) || charArray[i] == '.') {
                 temp.append(charArray[i]);
             } else {
-                numbersArray.add(Double.parseDouble(temp.toString()));
-                count++;
+                numbersList.add(Double.parseDouble(temp.toString()));
+                //count++;
                 temp.setLength(0);
             }
-
         }
-        numbersArray.add(Double.parseDouble(temp.toString()));
+        numbersList.add(Double.parseDouble(temp.toString()));
+        temp.setLength(0);
 
-        System.out.println(numbersArray);
+        for (int i = 0; i < charArray.length; i++) {
+            if (charArray[i] == '+' || charArray[i] == '-' || charArray[i] == '*' || charArray[i] == '/') {
+                singsList.add(charArray[i]);
+            }
+        }
+        System.out.println(numbersList);
+        System.out.println(singsList);
+        calculation(numbersList, singsList);
+    }
+
+    private static void calculation(LinkedList<Double> numbersList, LinkedList<Character> singsList) {
+        double temp;
+//        LinkedList<double>
+        for (int i = 0; i < singsList.size(); i++) {
+            if (singsList.get(i) == '*') {
+                temp = numbersList.get(i) * numbersList.get(i + 1);
+                numbersList.set(i + 1, temp);
+                numbersList.set(i, 0.0);
+                singsList.set(i, ' ');
+                System.out.println(numbersList);
+            } else if (singsList.get(i) == '/') {
+                temp = numbersList.get(i) / numbersList.get(i + 1);
+                numbersList.set(i + 1, temp);
+                numbersList.set(i, 0.0);
+                singsList.set(i, ' ');
+                System.out.println(numbersList);
+            }
+        }
+        List<Double> n =  numbersList.stream()
+                .filter(aDouble -> aDouble != 0.0)
+                .collect(Collectors.toList());
+        List<Character> ch = singsList.stream()
+                        .filter(character -> character != ' ')
+                                .collect(Collectors.toList());
+        System.out.println(n);
+        System.out.println(ch);
+        for (int i = 0; i < ch.size(); i++) {
+            if (ch.get(i) == '+') {
+                temp = n.get(i) + n.get(i + 1);
+                n.set(i + 1, temp);
+                n.set(i, 0.0);
+                System.out.println(n);
+            } else if (ch.get(i) == '-') {
+                temp = n.get(i) - n.get(i + 1);
+                n.set(i + 1, temp);
+                n.set(i, 0.0);
+                System.out.println(n);
+            }
+        }
+        System.out.println(n.get(n.size()-1));
     }
 }
+
+//2+5+9*2-2/4+6
+
